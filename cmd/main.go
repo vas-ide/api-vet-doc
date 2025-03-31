@@ -34,16 +34,17 @@ func main() {
 
 	for i := 0; i < 15; i++ {
 		wg.Add(1)
-		go statusGoogle(i, &wg)
-		
+		go func() {
+			statusGoogle(i)
+			defer wg.Done()
+		}()
 	}
 	wg.Wait()
 	tt := time.Since(t)
 	fmt.Printf("Total time %v\n", tt)
 }
 
-func statusGoogle(num int, wg *sync.WaitGroup) {
-	defer wg.Done()
+func statusGoogle(num int) {
 	resp, err := http.Get("https://google.com") 
 	if err != nil { 
 			fmt.Println(err) 
@@ -51,6 +52,6 @@ func statusGoogle(num int, wg *sync.WaitGroup) {
 	} 
 	defer resp.Body.Close()
 	sC := resp.StatusCode 
-	fmt.Printf("Try - %d status - %v \n", num, sC)
+	fmt.Printf("Try - %d status - %d \n",num, sC)
 //    io.Copy(os.Stdout, resp.Body)
 }
